@@ -45,11 +45,21 @@ def gather_financial_info():
     else: 
         assets = []
     yn = input("Do you have any liabilities/debts? (y/n): ")
-    if yn == 'n': 
+    if yn == 'y': 
         liabilities = liabilities_module.register_liabilities()
     else: 
         liabiltiies = []
-    print("------------ STEP 2: BASIC FINANCIAL INFO ------------")
+    match_401k = None
+    while match_401k is None: 
+        if input("Does your employer provide you with a 401k contribution match? (y/n): ") == 'y': 
+            match_401k = int(input("Up to how many dollars per year does your employer match your 401k contribution?: "))
+            if match_401k < 0: 
+                print("Match number cannot be negative!")
+                match_401k = None
+    print("------------ STEP 2: FINANCIAL GOALS ------------")
+    # Ask current and retirement age (investment horizon)
+    # Create financial goals list
+    # Identify risk tolerance
 
 if __name__=="__main__": 
     gather_financial_info()
