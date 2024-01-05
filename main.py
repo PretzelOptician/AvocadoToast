@@ -1,5 +1,6 @@
 import assets as asset_module
 import liabilities as liabilities_module
+import CONSTS as CONSTS
 
 def gather_financial_info(): 
     print("------------ STEP 1: BASIC FINANCIAL INFO ------------")
@@ -58,6 +59,36 @@ def gather_financial_info():
                 match_401k = None
     print("------------ STEP 2: FINANCIAL GOALS ------------")
     # Ask current and retirement age (investment horizon)
+    cur_age = None
+    while cur_age is None: 
+        age = int(input("Please input current age: "))
+        if age < 0: 
+            print("Please enter a valid age!")
+            age = None
+    ret_age = None
+    while ret_age is None: 
+        ret_age = int(input("Please enter your desired retirement age: "))
+        if ret_age < 0: 
+            print("Please enter a valid age!")
+            ret_age = None
+    ret_yearly_spending = None
+    while ret_yearly_spending is None: 
+        ret_yearly_spending = float(input("Please enter how many dollars per year you'd like to spend/live off of in retirement: "))
+        if ret_yearly_spending < 0: 
+            print("Please enter a valid value!")
+            ret_yearly_spending = None
+    ret_leftover = None
+    while ret_leftover is None: 
+        ret_leftover = float(input("Please enter how much money (in total net worth) you'd like to leave behind: "))
+        if ret_leftover < 0: 
+            print("That's not very ambitious... please enter a valid value")
+            ret_leftover = None
+    death_age = 90
+    avg_return = 0.9*CONSTS.short_tbill_return + 0.1*CONSTS.market_return
+    ret_years = death_age - ret_age
+    ret_funds = (ret_leftover - (-ret_yearly_spending/avg_return)*(1-(1+avg_return)**(-ret_years)))/((1+avg_return)**ret_years) # test this
+    print(f"Assuming a safe death age of {death_age} and 90% investment into short-term treasury bills at retirement (giving an average yearly return of {avg_return}), we estimate you'll need about ${ret_funds} by the time you retire.")
+
     # Create financial goals list
     # Identify risk tolerance
 
