@@ -16,5 +16,8 @@ long_tbill_risk = 0 # assumption of zero risk for treasury bills (if the US trea
 
 cash_return = 0.0046 # average interest for savings accounts, from cnn
 
-real_estate_return = 0.106
-real_estate_risk = 0.087
+real_estate_return = 0.106 # https://www.mdpi.com/1911-8074/15/8/369#:~:text=Including%20idiosyncratic%20and%20illiquidity%20risks,comparable%20to%20the%20S%26P%20500.
+real_estate_risk = 0.087 
+
+car_return = -0.0802 # https://www.carsdirect.com/auto-loans/what-is-the-average-car-depreciation-rate
+car_risk = 0.039 # this number was impossible to find. but I basically just took the 15% depreciation in first year and roughly 6.3% depreciation for the following years and found the SD off that

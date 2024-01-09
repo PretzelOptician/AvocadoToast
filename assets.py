@@ -11,7 +11,8 @@ Do NOT include illiquid depreciating assets like cars.
 3 - Long term treasury bonds
 4 - Cash
 5 - Real estate/house
-6 - Custom asset
+6 - Car
+7 - Custom asset
 '''
 
 class Asset(): 
@@ -62,49 +63,60 @@ class RealEstate(Asset):
         self.risk = CONSTS.real_estate_risk
         self.liquid = False
 
+class Vehicle(Asset):
+    def __init__(self, name: str, value: float): 
+        self.name = name
+        self.value = value
+        self.avg_return = CONSTS.car_return
+        self.risk = CONSTS.car_return
+        self.liquid = False
+
 def register_assets(): 
     assets = []
     print("Now, we will register your assets. We will start with asset 1, and you can list as many as you want. Pick from the options we give you or register your own custom asset. ")
     yn = 'y'
     while yn == 'y': 
-        name = input("Please give your asset an identifiable name: ")
-        value = None
-        while value == None: 
-            value = float(input("Current market value of this asset: "))
-            if value < 0: 
-                print("Market value can't be negative!")
-                value = None
-        print(asset_types_instructions)
-        new_asset = None
-        asset_type_id = int(input("Please enter the id you want (6 not working yet): "))
-        if asset_type_id == 1: 
-            new_asset = MarketFund(name, value)
-        elif asset_type_id == 2: 
-            new_asset = ShortTermTreasury(name, value)
-        elif asset_type_id == 3: 
-            new_asset = LongTermTreasury(name, value)
-        elif asset_type_id == 4: 
-            new_asset = Cash(name, value)
-        elif asset_type_id == 5: 
-            new_asset = RealEstate(name, value)
-        elif asset_type_id == 6: 
-            ret = None
-            while ret is None: 
-                ret = float(input("Please enter the expected annual return of this asset AS A DECIMAL (e.g. 0.1 for 10%): "))
-                if ret < 0 or ret > 1: 
-                    print("Return must be between 0 and 1!")
-            risk = None
-            while risk is None: 
-                risk = float(input("Please enter the expected standard deviation of the return AS A DECIMAL (e.g. 0.1 for 10%): "))
-                if risk < 0 or risk > 1: 
-                    print("Risk must be between 0 and 1!")
-            liquid = False
-            if input("Is this asset liquid (can it easily be converted into cash)? (y/n): ") == "y": 
-                liquid = True
-            new_asset = Asset(name, value, ret, risk, liquid)
-        else: 
-            print("Input not recognized. Restarting.")
+        new_asset = register_single_asset()
         assets.append(new_asset)
         yn = input("Would you like to register another asset? (y/n): ")
     return assets
     
+def register_single_asset(): 
+    name = input("Please give your asset an identifiable name: ")
+    value = None
+    while value == None: 
+        value = float(input("Current market value of this asset: "))
+        if value < 0: 
+            print("Market value can't be negative!")
+            value = None
+    print(asset_types_instructions)
+    new_asset: Asset = None
+    asset_type_id = int(input("Please enter the id you want (6 not working yet): "))
+    if asset_type_id == 1: 
+        new_asset = MarketFund(name, value)
+    elif asset_type_id == 2: 
+        new_asset = ShortTermTreasury(name, value)
+    elif asset_type_id == 3: 
+        new_asset = LongTermTreasury(name, value)
+    elif asset_type_id == 4: 
+        new_asset = Cash(name, value)
+    elif asset_type_id == 5: 
+        new_asset = RealEstate(name, value)
+    elif asset_type_id == 6: 
+        new_asset = Vehicle(name, value)
+    elif asset_type_id == 7:
+        ret = None
+        while ret is None: 
+            ret = float(input("Please enter the expected annual return of this asset AS A DECIMAL (e.g. 0.1 for 10%): "))
+        risk = None
+        while risk is None: 
+            risk = float(input("Please enter the expected standard deviation of the return AS A DECIMAL (e.g. 0.1 for 10%): "))
+            if risk < 0 or risk > 1: 
+                print("Risk must be between 0 and 1!")
+        liquid = False
+        if input("Is this asset liquid (can it easily be converted into cash)? (y/n): ") == "y": 
+            liquid = True
+        new_asset = Asset(name, value, ret, risk, liquid)
+    else: 
+        print("Input not recognized. Restarting.")
+    return new_asset

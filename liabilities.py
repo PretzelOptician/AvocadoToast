@@ -7,6 +7,7 @@ class Liability():
 def register_liabilities(): 
     liabilities = []
     print("Now, we will register your debts/liabilities. We will start with debt 1, and you can list as many as you want. ")
+    yn = 'y'
     while yn == 'y': 
         name = input("Please give your debt an identifiable name: ")
         value = None

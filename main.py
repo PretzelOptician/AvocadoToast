@@ -1,5 +1,6 @@
 import assets as asset_module
 import liabilities as liabilities_module
+import goals as goals_module
 import CONSTS as CONSTS
 
 def gather_financial_info(): 
@@ -90,6 +91,13 @@ def gather_financial_info():
     print(f"Assuming a safe death age of {death_age} and 90% investment into short-term treasury bills at retirement (giving an average yearly return of {avg_return}), we estimate you'll need about ${ret_funds} by the time you retire.")
 
     # Create financial goals list
+    yn = input("Do you have any financial goals? (y/n): ")
+    if yn == 'y': 
+        goals = goals_module.register_goals()
+    else: 
+        goals = []
+        
+
     # Identify risk tolerance
 
 if __name__=="__main__": 
