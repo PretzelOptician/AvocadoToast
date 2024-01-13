@@ -9,7 +9,7 @@ class FinancialGoal():
         self.asset = asset
 
 def register_goals(): 
-    goals = []
+    goals: list[FinancialGoal] = []
     print("Now, we will register your short and long term financial goals, apart from retirement. This can be anything from owning a house to taking a nice vacation. We will start with goal 1, and you can list as many as you want. ")
     yn = 'y'
     while yn == 'y': 

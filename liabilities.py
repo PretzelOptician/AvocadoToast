@@ -5,7 +5,7 @@ class Liability():
         self.interest = interest
 
 def register_liabilities(): 
-    liabilities = []
+    liabilities: list[Liability] = []
     print("Now, we will register your debts/liabilities. We will start with debt 1, and you can list as many as you want. ")
     yn = 'y'
     while yn == 'y': 
