@@ -32,23 +32,24 @@ class FinancialInfo():
         for liability in self.liabilities: 
             total_liabilities += liability.value
         net_worth = total_assets - total_liabilities
-            
+        investment_budget = self.pct_budget/100 * (self.income - self.taxes - self.expenses)            
         sorted_goals = sorted(self.financial_goals, key=lambda x: x.years) #TODO: reverse this (don't know how without google)
         net_worth_inc_needed = self.ret_funds - net_worth
         for goal in sorted_goals: 
             if goal.asset is None: 
                 net_worth_inc_needed += goal.amount
-        return_req = financial_calculator.get_return_from_fv_and_pv(net_worth+net_worth_inc_needed, net_worth, self.ret_age-self.cur_age)
+        return_req = financial_calculator.get_return_from_fv_and_pv(net_worth+net_worth_inc_needed, net_worth, self.ret_age-self.cur_age, investment_budget/12)
         print(f"Your net worth is approximately {net_worth} and the amount it will need to increase to get your retirement funds is {net_worth_inc_needed}! You have {self.ret_age-self.cur_age} years to accomplish this, so you will need to average a return of {return_req}.")
         return_table = {self.ret_age-self.cur_age: return_req}
         # this part is a little complicated. We are basically searching the average return required to hit all previous goals and if any aree higher, a higher return will be needed in that period of time. 
+        # print(sorted_goals)
         for goal in sorted_goals:
             inc_needed = goal.amount - net_worth
             for goal2 in sorted_goals: 
                 if goal2.years > goal.years: break
                 if goal2.asset is None: 
                     inc_needed += goal2.amount
-            new_return_req = financial_calculator.get_return_from_fv_and_pv(net_worth+inc_needed, net_worth, goal.years)
+            new_return_req = financial_calculator.get_return_from_fv_and_pv(net_worth+inc_needed, net_worth, goal.years, investment_budget/12)
             if new_return_req > return_req: 
                 return_req = new_return_req
                 return_table[goal.years] = return_req
@@ -174,6 +175,7 @@ if __name__=="__main__":
         file.close()
     else: 
         file = open('financial_info_saved', 'rb')
-        info = pickle.load(file)
+        info: FinancialInfo = pickle.load(file)
         file.close()
         print(info.toString())
+        print(info.calculate_return_table())
