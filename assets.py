@@ -81,14 +81,8 @@ def register_assets():
         yn = input("Would you like to register another asset? (y/n): ")
     return assets
     
-def register_single_asset(): 
+def register_single_asset(value: float): 
     name = input("Please give your asset an identifiable name: ")
-    value = None
-    while value == None: 
-        value = float(input("Current market value of this asset: "))
-        if value < 0: 
-            print("Market value can't be negative!")
-            value = None
     print(asset_types_instructions)
     new_asset: Asset = None
     asset_type_id = int(input("Please enter the id you want (6 not working yet): "))

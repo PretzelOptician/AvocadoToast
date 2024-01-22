@@ -3,6 +3,9 @@ import liabilities as liabilities_module
 import goals as goals_module
 import financial_calculator as financial_calculator
 import CONSTS as CONSTS
+import pickle
+import os
+from typing import List as list
 
 class FinancialInfo(): 
     def __init__(self, income: float, expenses: float, taxes: float, pct_budget: float, assets: list[asset_module.Asset], liabilities: list[liabilities_module.Liability], financial_goals: list[goals_module.FinancialGoal], match_401k: int, cur_age: int, ret_age: int, ret_yearly_spending: float, ret_leftover: float, ret_funds: float):
@@ -35,8 +38,8 @@ class FinancialInfo():
         for goal in sorted_goals: 
             if goal.asset is None: 
                 net_worth_inc_needed += goal.amount
-        return_req = financial_calculator.get_return_from_fv_and_pv(net_worth+net_worth_inc_needed, net_worth, ret_age-cur_age)
-        print(f"Your net worth is approximately {net_worth} and the amount it will need to increase to get your retirement funds is {net_worth_inc_needed}! You have {ret_age-cur_age} years to accomplish this, so you will need to average a return of {return_req}.")
+        return_req = financial_calculator.get_return_from_fv_and_pv(net_worth+net_worth_inc_needed, net_worth, self.ret_age-self.cur_age)
+        print(f"Your net worth is approximately {net_worth} and the amount it will need to increase to get your retirement funds is {net_worth_inc_needed}! You have {self.ret_age-self.cur_age} years to accomplish this, so you will need to average a return of {return_req}.")
         return_table = {self.ret_age-self.cur_age: return_req}
         # this part is a little complicated. We are basically searching the average return required to hit all previous goals and if any aree higher, a higher return will be needed in that period of time. 
         for goal in sorted_goals:
@@ -50,6 +53,17 @@ class FinancialInfo():
                 return_req = new_return_req
                 return_table[goal.years] = return_req
         return return_table
+    
+    def toString(self):
+        assets_str = ", ".join([str(asset) for asset in self.assets])
+        liabilities_str = ", ".join([str(liability) for liability in self.liabilities])
+        goals_str = ", ".join([str(goal) for goal in self.financial_goals])
+
+        return f"FinancialInfo(income={self.income}, expenses={self.expenses}, taxes={self.taxes}, pct_budget={self.pct_budget}, " \
+               f"assets=[{assets_str}], liabilities=[{liabilities_str}], financial_goals=[{goals_str}], " \
+               f"match_401k={self.match_401k}, cur_age={self.cur_age}, ret_age={self.ret_age}, " \
+               f"ret_yearly_spending={self.ret_yearly_spending}, ret_leftover={self.ret_leftover}, ret_funds={self.ret_funds})"
+
 
 def gather_financial_info(): 
     print("------------ STEP 1: BASIC FINANCIAL INFO ------------")
@@ -106,6 +120,8 @@ def gather_financial_info():
             if match_401k < 0: 
                 print("Match number cannot be negative!")
                 match_401k = None
+        else: 
+            break
     print("------------ STEP 2: FINANCIAL GOALS ------------")
     # Ask current and retirement age (investment horizon)
     cur_age = None
@@ -136,9 +152,9 @@ def gather_financial_info():
     avg_return = 0.9*CONSTS.short_tbill_return + 0.1*CONSTS.market_return
     avg_risk = 0.9*CONSTS.short_tbill_risk + 0.1*CONSTS.market_risk
     ret_years = death_age - ret_age
-    ret_funds = (ret_leftover - (-ret_yearly_spending/avg_return)*(1-(1+avg_return)**(-ret_years)))/((1+avg_return)**ret_years) # test this
+    ret_funds = financial_calculator.calc_retirement_funds(ret_leftover, ret_yearly_spending, avg_return, ret_years)
     print(f"Assuming a safe death age of {death_age} and 90% investment into short-term treasury bills at retirement (giving an average yearly return of {avg_return}), we estimate you'll need about ${ret_funds} by the time you retire.")
-    retirement_goal = goals_module.FinancialGoal(years=(ret_age-cur_age), amount=ret_funds, name="Retirement", asset=asset_module.Asset(name="Retirement Fund", amount=ret_funds, avg_return=avg_return, avg_risk=avg_risk, liquid=True))
+    retirement_goal = goals_module.FinancialGoal(years=(ret_age-cur_age), amount=ret_funds, name="Retirement", asset=asset_module.Asset(name="Retirement Fund", value=ret_funds, avg_return=avg_return, risk=avg_risk, liquid=True))
 
     # Create financial goals list
     yn = input("Do you have any financial goals? (y/n): ")
@@ -151,5 +167,13 @@ def gather_financial_info():
     return user_info
 
 if __name__=="__main__": 
-    info = gather_financial_info()
-    #save with pickl
+    if not os.path.exists('financial_info_saved'):
+        info = gather_financial_info()
+        file = open('financial_info_saved', 'wb')
+        pickle.dump(info, file)
+        file.close()
+    else: 
+        file = open('financial_info_saved', 'rb')
+        info = pickle.load(file)
+        file.close()
+        print(info.toString())
