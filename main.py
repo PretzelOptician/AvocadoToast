@@ -5,7 +5,19 @@ import financial_calculator as financial_calculator
 import CONSTS as CONSTS
 import pickle
 import os
+from copy import deepcopy
 from typing import List as list
+
+class PlanIteration(): 
+    def __init__(self, duration: float, start_delta: float, invest: bool, rate: float, description: str): 
+        self.duration = duration # duration of step in years
+        self.start_delta = start_delta # years from now that step starts
+        self.invest = invest # boolean that's true if buying asset, false if paying debt
+        self.rate = rate # the interest rate either of the debt being paid off or the asset being purchased
+        self.description = description # description of plan iteration
+
+    def toString(self): 
+        return f"duration={self.duration}, start_delta={self.start_delta}, invest={self.invest}, rate={self.rate}, description={self.description}"
 
 class FinancialInfo(): 
     def __init__(self, income: float, expenses: float, taxes: float, pct_budget: float, assets: list[asset_module.Asset], liabilities: list[liabilities_module.Liability], financial_goals: list[goals_module.FinancialGoal], match_401k: int, cur_age: int, ret_age: int, ret_yearly_spending: float, ret_leftover: float, ret_funds: float):
@@ -22,8 +34,9 @@ class FinancialInfo():
         self.ret_yearly_spending = ret_yearly_spending
         self.ret_leftover = ret_leftover
         self.ret_funds = ret_funds
+        self.investment_budget = self.pct_budget/100 * (self.income - self.taxes - self.expenses) 
 
-    def calculate_return_table(self): 
+    def calculate_return_table(self, start_year=0): 
         #calculate net worth
         total_assets = 0
         for asset in self.assets: 
@@ -32,8 +45,8 @@ class FinancialInfo():
         for liability in self.liabilities: 
             total_liabilities += liability.value
         net_worth = total_assets - total_liabilities
-        investment_budget = self.pct_budget/100 * (self.income - self.taxes - self.expenses)            
-        sorted_goals = sorted(self.financial_goals, key=lambda x: x.years) #TODO: reverse this (don't know how without google)
+        investment_budget = self.investment_budget
+        sorted_goals = sorted(self.financial_goals, key=lambda x: x.years, reverse=True)
         net_worth_inc_needed = self.ret_funds - net_worth
         for goal in sorted_goals: 
             if goal.asset is None: 
@@ -42,7 +55,6 @@ class FinancialInfo():
         print(f"Your net worth is approximately {net_worth} and the amount it will need to increase to get your retirement funds is {net_worth_inc_needed}! You have {self.ret_age-self.cur_age} years to accomplish this, so you will need to average a return of {return_req}.")
         return_table = {self.ret_age-self.cur_age: return_req}
         # this part is a little complicated. We are basically searching the average return required to hit all previous goals and if any aree higher, a higher return will be needed in that period of time. 
-        # print(sorted_goals)
         for goal in sorted_goals:
             inc_needed = goal.amount - net_worth
             for goal2 in sorted_goals: 
@@ -54,6 +66,32 @@ class FinancialInfo():
                 return_req = new_return_req
                 return_table[goal.years] = return_req
         return return_table
+
+    def advance_timeline(self, step: float): 
+        for goal in self.financial_goals: 
+            goal.years -= step
+        self.cur_age += step
+    
+    def create_plan(self): 
+        info_copy = deepcopy(self)
+        financial_plan: list[PlanIteration] = []
+        total_delta = 0
+        while info_copy.cur_age < info_copy.ret_age: 
+            return_table = info_copy.calculate_return_table()
+            rt_list = [(key, value) for key, value in return_table.items()]
+            high_interest_debt = [l.interest > rt_list[0][1] for l in self.liabilities]
+            if any(high_interest_debt): 
+                max_interest_debt = max(info_copy.liabilities, key=lambda obj: obj.interest)
+                duration = financial_calculator.time_to_pay_off_loan(max_interest_debt.value, info_copy.investment_budget, max_interest_debt.interest)
+                step = PlanIteration(duration, total_delta, False, max_interest_debt.interest, max_interest_debt.name)
+            else: 
+                duration = rt_list[1][0] if len(rt_list) > 1 else info_copy.ret_age-info_copy.cur_age
+                step = PlanIteration(duration, total_delta, True, rt_list[0][1], "invest")
+            financial_plan.append(step)
+            print("Created step! step: ", step.toString())
+            total_delta += duration
+            info_copy.advance_timeline(duration)
+        return financial_plan
     
     def toString(self):
         assets_str = ", ".join([str(asset) for asset in self.assets])
@@ -177,5 +215,5 @@ if __name__=="__main__":
         file = open('financial_info_saved', 'rb')
         info: FinancialInfo = pickle.load(file)
         file.close()
-        print(info.toString())
-        print(info.calculate_return_table())
+        plan = info.create_plan()
+        for step in plan: print(step.toString())
