@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Financial Plan Results</title>
+</head>
+<body>
+    <h2>Financial Plan Results</h2>
+    <!-- Display your results here -->
+    {% for step in results %}
+        <p>{{ step.toString() }}</p>
+    {% endfor %}
+    <a href="/">Go Back</a>
+</body>
+</html>

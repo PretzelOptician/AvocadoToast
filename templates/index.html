@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Financial Plan Input</title>
+    <script type="text/javascript">
+        function addAsset() {
+            var container = document.getElementById("assetsContainer");
+            var assetDiv = document.createElement("div");
+            assetDiv.innerHTML = '<input type="text" name="asset_name[]" placeholder="Asset Name" />' +
+                                 '<input type="number" name="asset_value[]" placeholder="Value" />' +
+                                 '<input type="number" name="asset_return[]" placeholder="Return" step="0.01" />' +
+                                 '<input type="number" name="asset_risk[]" placeholder="Risk" step="0.01" />' +
+                                 '<input type="checkbox" name="asset_liquid[]" checked /> <label for="asset_liquid[]">Liquid</label>' +
+                                 '<input type="button" value="Remove" onclick="removeAsset(this)" />';
+            container.appendChild(assetDiv);
+        }
+
+        function removeAsset(input) {
+            var container = document.getElementById("assetsContainer");
+            container.removeChild(input.parentNode);
+        }
+
+        function addLiability() {
+            var container = document.getElementById("liabilitiesContainer");
+            var liabilityDiv = document.createElement("div");
+            liabilityDiv.innerHTML = '<input type="text" name="liability_name[]" placeholder="Debt Name" />' +
+                                 '<input type="number" name="liability_value[]" placeholder="Value" />' +
+                                 '<input type="number" name="liability_interest[]" placeholder="Interest" step="0.01" />' +
+                                 '<input type="button" value="Remove" onclick="removeLiability(this)" />';
+            container.appendChild(liabilityDiv);
+        }
+
+        function removeLiability(input) {
+            var container = document.getElementById("liabilitiesContainer");
+            container.removeChild(input.parentNode);
+        }
+
+        function addGoal() {
+            var container = document.getElementById("goalsContainer");
+            var goalDiv = document.createElement("div");
+            goalDiv.innerHTML = '<input type="text" name="goal_name[]" placeholder="Goal Name" />' +
+                                 '<input type="number" name="goal_year[]" placeholder="Years to Goal" />' +
+                                 '<input type="number" name="goal_amount[]" placeholder="Amount to Save" step="0.01" />' +
+                                 '<input type="button" value="Remove" onclick="removeGoal(this)" />';
+            container.appendChild(goalDiv);
+        }
+
+        function removeGoal(input) {
+            var container = document.getElementById("goalsContainer");
+            container.removeChild(input.parentNode);
+        }
+    </script>
+</head>
+<body>
+    <h2>Enter Your Financial Information</h2>
+    <form action="/result" method="post">
+        <!-- Other form fields -->
+        <label for="income">Annual Income:</label>
+        <input type="number" id="income" name="income" placeholder="Enter your annual income" step="0.01" />
+        <br>
+        <label for="expenses">Annual Expenses:</label>
+        <input type="number" id="expenses" name="expenses" placeholder="Enter your annual expenses" step="0.01" />
+        <br>
+        <label for="taxes">Expected Income Tax:</label>
+        <input type="number" id="taxes" name="taxes" placeholder="Enter your expected annual income tax" step="0.01" />
+        <br>
+        <label for="pct_budget">Percentage of Budget for Goals (recommended as high as possible):</label>
+        <input type="number" id="pct_budget" name="pct_budget" placeholder="Enter budget percentage" min="0" max="100" step="0.01" required>
+        <br>
+        <label for="cur_age">Current Age:</label>
+        <input type="number" id="cur_age" name="cur_age" placeholder="Enter your current age" />
+        <br>
+        <label for="ret_age">Desired Retirement Age:</label>
+        <input type="number" id="ret_age" name="ret_age" placeholder="Enter your desired retirement age" />
+        <br>
+        <label for="ret_yearly_spending">Desired Yearly Spending in Retirement:</label>
+        <input type="number" id="ret_yearly_spending" name="ret_yearly_spending" placeholder="Enter your desired yearly spending in retirement" step="0.01" />
+        <br>
+        <label for="ret_leftover">Desired Money Leftover at Death:</label>
+        <input type="number" id="ret_leftover" name="ret_leftover" placeholder="Enter how much money you want to leave behind" step="0.01" />
+        <br>
+
+        <h3>Assets</h3>
+        <div id="assetsContainer">
+            <!-- Dynamic assets will be added here -->
+        </div>
+        <input type="button" value="Add Asset" onclick="addAsset()" />
+        
+        <h3>Liabilities</h3>
+        <div id="liabilitiesContainer">
+        </div>
+        <input type="button" value="Add Liability" onclick="addLiability()" />
+
+        <h3>Goals</h3>
+        <div id="goalsContainer">
+        </div>
+        <input type="button" value="Add Goal" onclick="addGoal()" />
+
+        <br>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
